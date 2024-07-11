@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Estilos generales para el resto de las páginas -->
+    <link href="{{ url_for('static', filename='css/style_general.css') }}" rel="stylesheet">
+    <style>
+        .content {
+            text-align: center;
+        }
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 10px;
+            width: 45%;
+            display: inline-block;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">App web</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Administrador</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user">Usuario</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido de la página principal -->
+    <div class="container mt-4 content">
+        <h1>Bienvenido a FoliarSage</h1>
+        <div class="info-box">
+            <p>En la sección de Administrador, podrás recopilar fotos para crear tu dataset personalizado.</p>
+        </div>
+        <div class="info-box">
+            <p>En la sección de Usuario, podrás tomar fotos de hojas de alfalfa para predecir enfermedades foliares.</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Scripts generales para el resto de las páginas -->
+    <script src="{{ url_for('static', filename='js/general.js') }}"></script>
+</body>
+</html>

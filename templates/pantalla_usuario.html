@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture and Inference</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <!-- Estilos generales -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_general.css') }}">
+    <style>
+        .camera-section, .image-section, .predictions-section {
+            text-align: center; /* Centrar contenido */
+            height: 400px; /* Altura fija para mantener consistencia */
+        }
+
+        .camera-section img, .image-section img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #predictions-chart {
+            width: 100%;
+            height: 100%;
+            margin-top: 20px;
+        }
+
+        #capture-btn-container {
+            position: sticky;
+            top: 20px; /* Ajusta el valor según sea necesario */
+        }
+
+        .page-title {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Ocultar la imagen capturada inicialmente */
+        #captured-image {
+            display: none;
+            max-width: 100%; /* Ajustar el tamaño máximo según sea necesario */
+            height: auto;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">App web</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Administrador</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/user">Usuario</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="my-4 page-title">Toma una foto y predice la enfermedad foliar</h1>
+        <div class="row">
+            <div class="col-md-4 camera-section">
+                <h3>Cámara en Vivo</h3>
+                <img src="{{ url_for('video_feed') }}" id="camera-feed">
+            </div>
+            <div class="col-md-4 image-section">
+                <h3>Imagen Capturada</h3>
+                <img id="captured-image" src="#" alt="Captured Image">
+            </div>
+            <div class="col-md-4 predictions-section">
+                <h3>Predicciones</h3>
+                <div id="predictions"></div>
+                <canvas id="predictions-chart"></canvas>
+            </div>
+        </div>
+        <div class="row mt-3" id="capture-btn-container">
+            <div class="col-md-12">
+                <button class="btn btn-primary btn-lg" id="capture-btn">Toma Foto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Scripts generales para el resto de las páginas -->
+    <script src="{{ url_for('static', filename='js/general.js') }}"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        document.getElementById('capture-btn').addEventListener('click', function() {
+            fetch('/capture', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar la imagen capturada
+                        document.getElementById('captured-image').style.display = 'block';
+                        document.getElementById('captured-image').src = 'data:image/jpeg;base64,' + data.image;
+    
+                        const predictions = data.predictions;
+    
+                        // Actualizar las predicciones en formato adecuado
+                        let labels = [];
+                        let probs = [];
+                        predictions.probs.forEach((prob, index) => {
+                            labels.push(predictions.names_dict[index]);
+                            probs.push(prob);
+                        });
+    
+                        // Actualizar HTML para mostrar "Most Likely"
+                        let predictionsHTML = `<h4>Most Likely: ${predictions.max_prob}</h4>`;
+    
+                        // Actualizar gráfico de pastel con Chart.js
+                        var ctx = document.getElementById('predictions-chart').getContext('2d');
+                        var myPieChart = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Probabilidades',
+                                    data: probs,
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.5)',
+                                        'rgba(54, 162, 235, 0.5)',
+                                        'rgba(255, 206, 86, 0.5)',
+                                        'rgba(75, 192, 192, 0.5)',
+                                        'rgba(153, 102, 255, 0.5)'
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        boxWidth: 20
+                                    }
+                                }
+                            }
+                        });
+    
+                        // Mostrar las predicciones en HTML
+                        document.getElementById('predictions').innerHTML = predictionsHTML;
+                    } else {
+                        alert('Failed to capture image.');
+                    }
+                });
+        });
+    </script>
+    
+
+</body>
+</html>

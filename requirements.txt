@@ -1,5 +1,5 @@
-Flask>=2.0.2
-requests>=2.32.0
-opencv-python>=4.1.1
-numpy>=1.23.5
-ultralytics>=8.2.34
+Flask==2.0.2
+requests==2.32.0
+opencv-python==4.1.1
+numpy==1.23.5
+ultralytics==8.2.34
